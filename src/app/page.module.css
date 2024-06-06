@@ -3,7 +3,7 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 6rem;
+  padding: 20px;
   min-height: 100vh;
 }
 
@@ -46,11 +46,17 @@
   width: var(--max-width);
 }
 
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
 .card {
-  padding: 1rem 1.2rem;
-  border-radius: var(--border-radius);
+  padding: 20px;
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 5px;
   background: rgba(var(--card-rgb), 0);
-  border: 1px solid rgba(var(--card-border-rgb), 0);
   transition: background 200ms, border 200ms;
 }
 

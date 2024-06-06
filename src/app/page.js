@@ -1,95 +1,70 @@
-import Image from "next/image";
-import styles from "./page.module.css";
 
-export default function Home() {
+"use client"
+import React, { useState, useEffect } from "react";
+import styles from "./page.module.css";
+import Loader from "./Loader"; // Import a loader component (optional)
+
+async function fetchCharacters() {
+  try {
+    const res = await fetch("http://192.168.0.157:8000/docs"); // Replace with actual data endpoint
+    if (!res.ok) {
+      throw new Error("Failed to fetch data");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching characters:", error);
+    return []; // Return an empty array to prevent errors during rendering
+  }
+}
+
+export default async function Home() {
+  const [fetchedData, setFetchedData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
+  const [error, setError] = useState(null); // Track any errors
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchCharacters();
+        setFetchedData(data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      {isLoading ? (
+        <Loader /> // Optional loader component
+      ) : error ? (
+        <div>Error fetching data: {error.message}</div>
+      ) : (
+        <>
+          <h1>Data fetched at build time:</h1>
+          <div className={styles.cardContainer}>
+            {fetchedData.map((character, index) => (
+              <div key={index} className={styles.card}>
+                <h2>{character.page}</h2>
+                <p>
+                  <strong>Page Size:</strong> {character.page_size || "Unknown"}
+                </p>
+                <p>
+                  <strong>Minimum Page Price:</strong>{" "}
+                  {character.min_price !== undefined ? character.min_price : "Unknown"}
+                </p>
+                <p>
+                  <strong>Maximum Page Price:</strong>{" "}
+                  {character.max_price !== undefined ? character.max_price : "Unknown"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }
